@@ -1,4 +1,5 @@
-// Module 2: the four tools Ask Copper can use. Products and prices come from
+// Module 2: the tools Ask Copper can use (four from the course, plus
+// get_plan_features, added in this extension). Products and prices come from
 // lib/copper/catalog.ts and stock from lib/copper/inventory.ts, so the
 // chatbot never has to make them up.
 // The contract for each tool is in specs/module-2/spec.md.
@@ -29,6 +30,17 @@ export type Prices = {
     name: string;
     monthlyUsd: number;
     annualUsd: number;
+  }[];
+};
+
+export type PlanFeatures = {
+  plans: {
+    id: Plan["id"];
+    name: string;
+    memoryDays: number;
+    /** A number of hours, or "Unlimited". */
+    notesHoursPerMonth: string;
+    refinedAnswers: boolean;
   }[];
 };
 
@@ -91,6 +103,21 @@ export function getPrices(): Prices {
       monthlyUsd,
       annualUsd,
     })),
+  };
+}
+
+/** get_plan_features: what each plan includes, read from the catalog. */
+export function getPlanFeatures(): PlanFeatures {
+  return {
+    plans: getPlans().map(
+      ({ id, name, memoryDays, notesHoursPerMonth, refinedAnswers }) => ({
+        id,
+        name,
+        memoryDays,
+        notesHoursPerMonth,
+        refinedAnswers,
+      }),
+    ),
   };
 }
 
@@ -212,6 +239,13 @@ const get_prices = tool({
   execute: async () => getPrices(),
 });
 
+const get_plan_features = tool({
+  description:
+    "Say what the Free plan and Copper Plus each include: how long Copper remembers, Copper Notes hours per month, and whether answers are refined (not their prices).",
+  inputSchema: z.object({}),
+  execute: async () => getPlanFeatures(),
+});
+
 const calculate_cost = tool({
   description:
     "Work out the total cost of 0 to 5 devices plus a plan, billed monthly or annually, over 1 to 5 years.",
@@ -229,6 +263,7 @@ const check_availability = tool({
 export const copperTools = {
   get_products,
   get_prices,
+  get_plan_features,
   calculate_cost,
   check_availability,
 };

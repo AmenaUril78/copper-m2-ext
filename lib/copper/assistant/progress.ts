@@ -37,6 +37,7 @@ export function toolCallsOf(progress: Progress) {
 export const TOOL_LABELS: Record<string, string> = {
   get_products: "Listing the products",
   get_prices: "Looking up prices",
+  get_plan_features: "Looking up plan features",
   calculate_cost: "Working out the cost",
   check_availability: "Checking stock",
 };
