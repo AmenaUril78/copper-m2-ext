@@ -4,11 +4,18 @@ import { Loader2Icon } from "lucide-react";
 import type {
   Availability,
   CostBreakdown,
+  PlanFeatures,
   Prices,
   ProductList,
 } from "@/lib/copper/assistant/tools";
 import { TOOL_LABELS, type ToolStep } from "@/lib/copper/assistant/progress";
-import { formatUsd, getPlans, getProducts } from "@/lib/copper/catalog";
+import {
+  formatMemory,
+  formatNotesHours,
+  formatUsd,
+  getPlans,
+  getProducts,
+} from "@/lib/copper/catalog";
 
 type Fields = Record<string, unknown>;
 
@@ -82,6 +89,10 @@ function Sent({ step }: { step: ToolStep }) {
     return <p className="italic">Nothing, it just asked for the price list</p>;
   if (step.name === "get_products")
     return <p className="italic">Nothing, it just asked what Copper sells</p>;
+  if (step.name === "get_plan_features")
+    return (
+      <p className="italic">Nothing, it just asked what the plans include</p>
+    );
 
   const productName = (id: unknown) =>
     getProducts().find((p) => p.id === id)?.name ?? String(id);
@@ -195,6 +206,26 @@ function Back({ step }: { step: ToolStep }) {
               </span>
             </div>
           ))}
+      </div>
+    );
+  }
+
+  if (step.name === "get_plan_features") {
+    const { plans } = step.output as PlanFeatures;
+    return (
+      <div className="space-y-3">
+        {plans.map((plan) => (
+          <div key={plan.id}>
+            <p className="font-medium">{plan.name}</p>
+            <ul className="text-muted-foreground list-disc pl-5 text-xs">
+              <li>Remembers for {formatMemory(plan.memoryDays)}</li>
+              <li>Copper Notes: {formatNotesHours(plan.notesHoursPerMonth)}</li>
+              <li>
+                {plan.refinedAnswers ? "Refined answers" : "No refined answers"}
+              </li>
+            </ul>
+          </div>
+        ))}
       </div>
     );
   }
